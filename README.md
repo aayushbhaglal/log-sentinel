@@ -1,2 +1,2 @@
 # log-sentinel
-An end-to-end MLOps pipeline for real-time log anomaly detection in microservice systems using multi-modal observability data (logs, metrics, traces) with drift detection, auto-retraining, and Prometheus-based monitoring.
+A real-time, unsupervised machine learning pipeline that detects **semantic drift** in structured log templates. Designed with MLOps best practices, it combines log mining, embedding, clustering, and drift detection with self-healing retraining for robust observability.
