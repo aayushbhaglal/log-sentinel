@@ -15,5 +15,5 @@ if __name__ == "__main__":
     line_queue = Queue()
     start_processing_thread(line_queue, processor)
 
-    print(f"Monitoring log file: {config['log_file_path']}")
+    print(f"\nMonitoring log file: {config['log_file_path']}")
     tail_log_file(config["log_file_path"], line_queue)
