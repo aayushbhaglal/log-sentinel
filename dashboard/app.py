@@ -1,7 +1,12 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import matplotlib.collections as mcoll
+import mplcursors
 import time
 import os
+import numpy as np
 
 # Path to drift log CSV
 DRIFT_LOG_PATH = "../data/processed/drift_history.csv"
@@ -13,9 +18,26 @@ st.title("📈 Log Drift Score Monitoring")
 # Container for seamless refresh
 placeholder = st.empty()
 
+def color_segments(x, y, labels):
+    """Create colored line segments based on labels."""
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    colors = []
+    for i in range(len(labels) - 1):
+        if labels[i + 1] == "updated":
+            colors.append("#2ecc71")  # Green
+        elif labels[i + 1] == "alert":
+            colors.append("#e74c3c")  # Red
+        else:
+            colors.append("#3498db")  # Blue
+
+    lc = mcoll.LineCollection(segments, colors=colors, linewidths=2)
+    return lc
+
+# Main loop
 while True:
     with placeholder.container():
-        # Read the latest drift log
         if not os.path.exists(DRIFT_LOG_PATH):
             st.warning("Drift log file not found.")
             time.sleep(3)
@@ -28,17 +50,76 @@ while True:
         else:
             st.subheader("📊 Drift Score Over Time")
 
-            # Use timestamp or fallback to line number
-            if "start_timestamp" in df.columns and df["start_timestamp"].notna().all():
-                df["x"] = pd.to_datetime(df["start_timestamp"])
+            # x-axis: log line numbers
+            x_vals = df["start_line"].values
+            y_vals = df["drift_score"].values
+            timestamps = df["start_timestamp"].fillna("").values
+
+            # Label rows for segment coloring
+            def label_row(row):
+                if row["centroid_updated"]:
+                    return "updated"
+                elif row["alert"]:
+                    return "alert"
+                else:
+                    return "normal"
+
+            df["label"] = df.apply(label_row, axis=1)
+            labels = df["label"].values
+
+            # Plot setup
+            fig, ax = plt.subplots(figsize=(10, 4))
+            fig.patch.set_alpha(0.0)  # Transparent figure background
+            ax.set_facecolor("none")  # Transparent axes
+
+            # Colored segments
+            lc = color_segments(x_vals, y_vals, labels)
+            ax.add_collection(lc)
+            # Show last N points
+            visible_points = 50  # Change as needed
+            if len(x_vals) > visible_points:
+                ax.set_xlim(x_vals[-visible_points], x_vals[-1])
             else:
-                df["x"] = df["start_line"]
+                ax.set_xlim(x_vals.min(), x_vals.max())
+            ax.set_ylim(0, 1)  
 
-            # Show line chart
-            st.line_chart(df.set_index("x")[["drift_score"]])
+            # Threshold line
+            ax.axhline(0.25, color='#7f8c8d', linestyle='--', linewidth=1.2, label="Threshold")
 
-            # Show last few records
+            # Axes styling
+            ax.tick_params(colors='white', labelsize=10)
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.set_xlabel("Log Line Number", fontsize=11, color='white')
+            ax.set_ylabel("Drift Score", fontsize=11, color='white')
+            ax.set_title("Drift Score Trend", fontsize=13, weight='bold', color='white')
+            ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.3)
+
+            # Legend
+            custom_lines = [
+                plt.Line2D([0], [0], color="#3498db", lw=2, label="Normal"),
+                plt.Line2D([0], [0], color="#e74c3c", lw=2, label="Alert"),
+                plt.Line2D([0], [0], color="#2ecc71", lw=2, label="Centroid Updated"),
+                plt.Line2D([0], [0], color="#7f8c8d", lw=1.2, linestyle='--', label="Threshold"),
+            ]
+            ax.legend(handles=custom_lines, loc='upper right', fontsize=9)
+
+            # Hover annotations
+            cursor = mplcursors.cursor(ax, hover=True)
+            @cursor.connect("add")
+            def on_add(sel):
+                i = sel.index
+                timestamp = timestamps[i] if i < len(timestamps) else "N/A"
+                drift = y_vals[i] if i < len(y_vals) else "N/A"
+                line = x_vals[i] if i < len(x_vals) else "N/A"
+                sel.annotation.set_text(f"Line: {line}\nTime: {timestamp}\nDrift: {drift:.4f}")
+
+            # Show plot
+            st.pyplot(fig)
+
+            # Show recent drift logs
             st.subheader("📄 Recent Drift Records")
             st.dataframe(df.tail(10), use_container_width=True)
+            fig.tight_layout()
 
     time.sleep(3)
