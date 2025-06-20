@@ -1,3 +1,5 @@
+import sys
+import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,8 +10,17 @@ import time
 import os
 import numpy as np
 
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(ROOT_DIR)
+
+from scripts.config_loader import load_config
+from scripts.paths import PROJECT_ROOT
+from scripts.paths import CONFIG_PATH
+
+config = load_config(CONFIG_PATH)
+
 # Path to drift log CSV
-DRIFT_LOG_PATH = "../data/processed/drift_history.csv"
+DRIFT_LOG_PATH = str(PROJECT_ROOT / config["drift_history_file_path"])
 
 # Page setup
 st.set_page_config(page_title="Drift Monitor", layout="wide")
@@ -84,7 +95,7 @@ while True:
             ax.set_ylim(0, 1)  
 
             # Threshold line
-            ax.axhline(0.25, color='#7f8c8d', linestyle='--', linewidth=1.2, label="Threshold")
+            ax.axhline(config["drift_threshold"], color='#7f8c8d', linestyle='--', linewidth=1.2, label="Threshold")
 
             # Axes styling
             ax.tick_params(colors='white', labelsize=10)
@@ -119,7 +130,19 @@ while True:
 
             # Show recent drift logs
             st.subheader("📄 Recent Drift Records")
-            st.dataframe(df.tail(10), use_container_width=True)
+
+            # Rename columns for display
+            display_df = df.tail(10).rename(columns={
+                "start_line": "Log Line",
+                "start_timestamp": "Start Time",
+                "drift_score": "Drift Score",
+                "centroid_updated": "Centroid Updated",
+                "alert": "Alert Triggered",
+                "label": "Label"
+            })
+
+            st.dataframe(display_df, use_container_width=True)
+
             fig.tight_layout()
 
     time.sleep(3)

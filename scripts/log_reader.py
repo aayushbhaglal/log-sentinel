@@ -1,17 +1,17 @@
-import os
-import time
 import threading
 from queue import Queue
+from log_sources.loader import get_log_source
+from log_sources.base import LogSource
 
-def tail_log_file(filepath, line_queue):
-    with open(filepath, "r") as f:
-        f.seek(0, os.SEEK_END)
-        while True:
-            line = f.readline()
-            if line:
-                line_queue.put(line.strip())
-            else:
-                time.sleep(0.1)
+def tail_log_source(config: dict, line_queue: Queue):
+    log_source: LogSource = get_log_source(config)
+
+    print("\nStarting to monitor log stream:")
+    for line in log_source.stream():
+        line_queue.put(line)
+
+    return line_queue
+    
 
 def start_processing_thread(line_queue, processor):
     def loop():

@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 from utils import cosine_distance
 from parser import parse_log_line  
+from paths import PROJECT_ROOT
 
 class LogProcessor:
     def __init__(self, model, config, pbar):
@@ -18,7 +19,7 @@ class LogProcessor:
         self.drift_patience = config.get("drift_patience", 3)
 
         self.stride = int(config["window_size"] * (1 - config["overlap"])) or 1
-        self.output_file = config["drift_history_file_path"]
+        self.output_file = str(PROJECT_ROOT / config["drift_history_file_path"])
 
         if not os.path.exists(self.output_file):
             with open(self.output_file, "w", newline="") as f:

@@ -1,5 +1,7 @@
-log_file_path: ../data/raw/hadoop-hdfs-datanode-mesos-32.log
-drift_history_file_path: ../data/processed/drift_history.csv
+log_source:
+  type: "file"
+  path: "data/raw/hadoop-hdfs-datanode-mesos-32.log"
+drift_history_file_path: data/processed/drift_history.csv
 drift_patience: 3
 window_size: 1000
 overlap: 0.4
