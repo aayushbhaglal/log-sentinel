@@ -1,8 +1,6 @@
 log_source:
-  type: kafka
-  topic: log-stream
-  bootstrap_servers: localhost:9092
-  group_id: log-sentinel
+  type: "file"
+  path: "data/raw/hadoop-hdfs-datanode-mesos-32.log"
 drift_history_file_path: data/processed/drift_history.csv
 drift_patience: 3
 window_size: 1000
