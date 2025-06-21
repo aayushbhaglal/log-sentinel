@@ -1,7 +1,7 @@
 log_source:
   type: kafka
   topic: log-stream
-  bootstrap_servers: localhost:9092
+  bootstrap_servers: kafka:9092
   group_id: log-sentinel
 drift_history_file_path: data/processed/drift_history.csv
 drift_patience: 3

@@ -3,3 +3,9 @@ numpy
 tqdm
 PyYAML
 watchdog
+kafka-python>=2.0.2
+pathlib
+matplotlib
+pandas
+streamlit
+mplcursors
