@@ -6,7 +6,6 @@ from log_sources.base import LogSource
 def tail_log_source(config: dict, line_queue: Queue):
     log_source: LogSource = get_log_source(config)
 
-    print("\nStarting to monitor log stream:")
     for line in log_source.stream():
         line_queue.put(line)
 

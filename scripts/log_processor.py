@@ -1,13 +1,15 @@
 import csv
 import os
-from tqdm import tqdm
 import numpy as np
 from utils import cosine_distance
 from parser import parse_log_line  
 from paths import PROJECT_ROOT
+from logger import setup_logger
+
 
 class LogProcessor:
     def __init__(self, model, config, pbar):
+        self.logger = setup_logger("LogProcessor", str(PROJECT_ROOT / config["log_file_path"]))
         self.model = model
         self.config = config
         self.pbar = pbar
@@ -65,8 +67,7 @@ class LogProcessor:
                         self.drift_streak = 0
                 else:
                     self.drift_streak = 0
-
-                tqdm.write(
+                self.logger.info(
                     f"[DRIFT] {start_line}-{end_line} | Score: {drift:.4f} | Alert: {alert} | Updated: {updated}"
                 )
 
