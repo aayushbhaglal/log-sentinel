@@ -9,6 +9,7 @@ import mplcursors
 import time
 import os
 import numpy as np
+import json
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
@@ -21,6 +22,7 @@ config = load_config(CONFIG_PATH)
 
 # Path to drift log CSV
 DRIFT_LOG_PATH = str(PROJECT_ROOT / config["drift_history_file_path"])
+HEALTH_LOG_PATH = str(PROJECT_ROOT / config["health_logs_path"])
 
 # Page setup
 st.set_page_config(page_title="Drift Monitor", layout="wide")
@@ -46,9 +48,25 @@ def color_segments(x, y, labels):
     lc = mcoll.LineCollection(segments, colors=colors, linewidths=2)
     return lc
 
+sidebar_placeholder = st.sidebar.empty()
+
 # Main loop
 while True:
     with placeholder.container():
+        with sidebar_placeholder.container():
+            st.header("🩺 Health Status")
+            if os.path.exists(HEALTH_LOG_PATH):
+                try:
+                    with open(HEALTH_LOG_PATH, "r") as f:
+                        health_data = json.load(f)
+                    for component, data in health_data.items():
+                        timestamp = round(data["timestamp"], 2) if data["timestamp"] else "N/A"
+                        st.markdown(f"**{component}**: `{data['status']}` (updated: {timestamp})")
+                except Exception as e:
+                    st.error("Failed to load health data.")
+            else:
+                st.info("No health data available yet.")
+
         if not os.path.exists(DRIFT_LOG_PATH):
             st.warning("Drift log file not found.")
             time.sleep(3)

@@ -4,6 +4,7 @@ log_source:
   bootstrap_servers: kafka:9092
   group_id: log-sentinel
 drift_history_file_path: data/processed/drift_history.csv
+health_logs_path: logs/health_logs.json
 log_file_path: logs/app.log
 drift_patience: 3
 window_size: 1000
