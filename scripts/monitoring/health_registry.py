@@ -2,18 +2,19 @@ import sys
 import os
 import threading
 import time
+import tempfile
+import shutil
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from paths import CONFIG_PATH
 from paths import PROJECT_ROOT
-from config_loader import load_config
+from config import get_config
 import json
 
 
 class HealthRegistry:
     def __init__(self):
-        config = load_config(CONFIG_PATH)
+        config = get_config()
         self._lock = threading.Lock()
         self._registry = {}
         self.timeout = 15
@@ -34,10 +35,9 @@ class HealthRegistry:
 
     def get(self, component_name):
         with self._lock:
-            if component_name=="log_processor":
-                entry = self._registry.get(component_name)
-                if entry and (time.time() - entry["timestamp"] > self.timeout):
-                    return {"status": "stale", "message": "timeout expired", "timestamp": None}            
+            entry = self._registry.get(component_name)
+            if self.is_stale(entry, self.timeout):
+                return {"status": "stale", "message": "timeout expired", "timestamp": None}            
 
             return self._registry.get(component_name, {"status": "UNKNOWN", "message": "Not reported", "timestamp": None})
 
@@ -49,10 +49,26 @@ class HealthRegistry:
         while True:
             try:
                 with self._lock:
-                    with open(self.output_path, "w") as f:
-                        json.dump(self._registry, f, indent=2)
+                    temp_fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(self.output_path))
+                    with os.fdopen(temp_fd, "w") as tmp_file:
+                        json.dump(self._registry, tmp_file, indent=2)
+                    shutil.move(temp_path, self.output_path)
             except Exception as e:
                 print(f"[HealthRegistry] Failed to write health file: {e}")
             time.sleep(3)
+
+    def is_stale(self, entry, timeout):
+        return time.time() - entry["timestamp"] > timeout
+    
+    def heartbeat(self, component_name):
+        self.update(component_name, "healthy", "heartbeat")
         
 registry = HealthRegistry()
+
+def start_heartbeat(component_name: str, interval: int = 5):
+        def heartbeat_loop():
+            while True:
+                registry.heartbeat(component_name)
+                time.sleep(interval)
+        thread = threading.Thread(target=heartbeat_loop, daemon=True)
+        thread.start()

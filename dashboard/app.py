@@ -14,11 +14,10 @@ import json
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(ROOT_DIR)
 
-from scripts.config_loader import load_config
+from scripts.config import get_config
 from scripts.paths import PROJECT_ROOT
-from scripts.paths import CONFIG_PATH
 
-config = load_config(CONFIG_PATH)
+config = get_config()
 
 # Path to drift log CSV
 DRIFT_LOG_PATH = str(PROJECT_ROOT / config["drift_history_file_path"])

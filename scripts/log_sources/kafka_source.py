@@ -2,10 +2,13 @@ import sys
 import os
 from .base import LogSource
 from kafka import KafkaConsumer
+from kafka.errors import KafkaError
+import time
+import threading
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
 
-from monitoring.health_registry import registry as health_registry
+from scripts.monitoring.health_registry import registry as health_registry
 
 class KafkaLogSource(LogSource):
     def __init__(self, topic, bootstrap_servers="localhost:9092", group_id="log-sentinel"):
@@ -17,10 +20,25 @@ class KafkaLogSource(LogSource):
                 auto_offset_reset="latest",  # start from the latest messages
                 enable_auto_commit=True
             )
-            health_registry.update("kafka_consumer", "healthy")
+            
+            # Start background heartbeat thread to monitor health
+            thread = threading.Thread(target=self._health_heartbeat_loop, daemon=True)
+            thread.start()
         except Exception as e:
             health_registry.update("kafka_consumer", "unhealthy")
 
     def stream(self):
         for message in self.consumer:
             yield message.value.decode("utf-8")
+
+    def _health_heartbeat_loop(self):
+        """Background thread that periodically checks Kafka connection health."""
+        while True:
+            try:
+                _ = self.consumer.topics()
+                health_registry.update("kafka_consumer", "healthy", "Connected to broker")
+            except KafkaError as e:
+                health_registry.update("kafka_consumer", "unhealthy", f"Broker error: {e}")
+            except Exception as e:
+                health_registry.update("kafka_consumer", "unhealthy", f"Unexpected error: {e}")
+            time.sleep(5)
