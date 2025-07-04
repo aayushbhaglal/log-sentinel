@@ -43,6 +43,8 @@ class HealthRegistry:
 
     def all(self):
         with self._lock:
+            for key in list(self._registry.keys()):
+                self.get(key)  # Update stale entries
             return dict(self._registry)
     
     def _save_loop(self):
