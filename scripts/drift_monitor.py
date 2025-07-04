@@ -4,8 +4,6 @@ from sentence_transformers import SentenceTransformer
 import os
 import sys
 
-# ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-# sys.path.insert(0, ROOT_DIR)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from scripts.config import get_config
