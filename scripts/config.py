@@ -1,5 +1,5 @@
 import yaml
-from scripts.paths import CONFIG_PATH
+from utils.paths import CONFIG_PATH
 
 _config = None
 

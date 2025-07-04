@@ -10,7 +10,7 @@ import numpy as np
 import json
 
 from scripts.config import get_config
-from scripts.paths import PROJECT_ROOT
+from utils.paths import PROJECT_ROOT
 
 config = get_config()
 

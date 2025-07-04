@@ -4,11 +4,11 @@ from sentence_transformers import SentenceTransformer
 
 from scripts.config import get_config
 from scripts.log_reader import tail_log_source, start_processing_thread
-from scripts.log_processor import LogProcessor
-from scripts.paths import PROJECT_ROOT
-from scripts.logger import setup_logger
-from scripts.monitoring.health_registry import registry as health_registry
-from scripts.monitoring.health_registry import start_heartbeat 
+from processing.log_processor import LogProcessor
+from utils.paths import PROJECT_ROOT
+from utils.logger import setup_logger
+from monitoring.health_registry import registry as health_registry
+from monitoring.health_registry import start_heartbeat 
 
 if __name__ == "__main__":
     config = get_config()

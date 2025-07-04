@@ -3,7 +3,7 @@ import threading
 import time
 import tempfile
 import shutil
-from scripts.paths import PROJECT_ROOT
+from utils.paths import PROJECT_ROOT
 from scripts.config import get_config
 import json
 

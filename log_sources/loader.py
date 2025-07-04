@@ -1,8 +1,8 @@
-from scripts.log_sources.file_source import FileLogSource
-from scripts.log_sources.kafka_source import KafkaLogSource
-from scripts.log_sources.base import LogSource
+from log_sources.file_source import FileLogSource
+from log_sources.kafka_source import KafkaLogSource
+from log_sources.base import LogSource
 
-from scripts.paths import PROJECT_ROOT
+from utils.paths import PROJECT_ROOT
 
 def get_log_source(config: dict) -> LogSource:
     source_config = config.get("log_source", {})

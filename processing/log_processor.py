@@ -2,12 +2,12 @@ import csv
 import os
 import numpy as np
 
-from scripts.utils import cosine_distance
-from scripts.parser import parse_log_line  
-from scripts.paths import PROJECT_ROOT
-from scripts.logger import setup_logger
+from utils.utils import cosine_distance
+from utils.parser import parse_log_line  
+from utils.paths import PROJECT_ROOT
+from utils.logger import setup_logger
 
-from scripts.monitoring.health_registry import registry as health_registry
+from monitoring.health_registry import registry as health_registry
 
 class LogProcessor:
     def __init__(self, model, config, pbar):

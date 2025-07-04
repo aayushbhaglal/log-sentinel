@@ -1,5 +1,5 @@
 import time
-from scripts.log_sources.base import LogSource
+from log_sources.base import LogSource
 
 class FileLogSource(LogSource):
     def __init__(self, filepath):

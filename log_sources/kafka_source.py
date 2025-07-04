@@ -1,10 +1,10 @@
-from scripts.log_sources.base import LogSource
+from log_sources.base import LogSource
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 import time
 import threading
 
-from scripts.monitoring.health_registry import registry as health_registry
+from monitoring.health_registry import registry as health_registry
 
 class KafkaLogSource(LogSource):
     def __init__(self, topic, bootstrap_servers="localhost:9092", group_id="log-sentinel"):
