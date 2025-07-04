@@ -1,18 +1,13 @@
-import sys
 import os
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import matplotlib.collections as mcoll
 import mplcursors
 import time
 import os
 import numpy as np
 import json
-
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(ROOT_DIR)
 
 from scripts.config import get_config
 from scripts.paths import PROJECT_ROOT
@@ -150,8 +145,10 @@ while True:
 
             # Rename columns for display
             display_df = df.tail(10).rename(columns={
-                "start_line": "Log Line",
+                "start_line": "window Start",
+                "end_line": "Window End",
                 "start_timestamp": "Start Time",
+                "end_timestamp": "End Time",
                 "drift_score": "Drift Score",
                 "centroid_updated": "Centroid Updated",
                 "alert": "Alert Triggered",

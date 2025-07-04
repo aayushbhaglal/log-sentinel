@@ -1,14 +1,10 @@
-import sys
 import os
 import threading
 import time
 import tempfile
 import shutil
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from paths import PROJECT_ROOT
-from config import get_config
+from scripts.paths import PROJECT_ROOT
+from scripts.config import get_config
 import json
 
 

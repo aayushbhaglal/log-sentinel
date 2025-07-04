@@ -1,12 +1,8 @@
-import sys
-import os
-from .base import LogSource
+from scripts.log_sources.base import LogSource
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 import time
 import threading
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..","..")))
 
 from scripts.monitoring.health_registry import registry as health_registry
 

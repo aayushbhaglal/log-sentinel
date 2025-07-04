@@ -1,10 +1,6 @@
 from tqdm import tqdm
 from queue import Queue
 from sentence_transformers import SentenceTransformer
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from scripts.config import get_config
 from scripts.log_reader import tail_log_source, start_processing_thread
@@ -16,7 +12,7 @@ from scripts.monitoring.health_registry import start_heartbeat
 
 if __name__ == "__main__":
     config = get_config()
-    logger = setup_logger("DriftMonitor", str(PROJECT_ROOT / config["log_file_path"]))
+    logger = setup_logger("main", str(PROJECT_ROOT / config["log_file_path"]))
 
     try:
         logger.info("Initializing BERT model...")
@@ -29,7 +25,7 @@ if __name__ == "__main__":
         line_queue = Queue()
         start_processing_thread(line_queue, processor)
 
-        start_heartbeat("drift_monitor")
+        start_heartbeat("main")
 
         logger.info("Starting log tailing...")
         tail_log_source(config, line_queue)

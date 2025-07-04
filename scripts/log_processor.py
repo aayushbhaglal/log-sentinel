@@ -1,8 +1,6 @@
 import csv
 import os
 import numpy as np
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from scripts.utils import cosine_distance
 from scripts.parser import parse_log_line  
@@ -13,7 +11,7 @@ from scripts.monitoring.health_registry import registry as health_registry
 
 class LogProcessor:
     def __init__(self, model, config, pbar):
-        self.logger = setup_logger("LogProcessor", str(PROJECT_ROOT / config["log_file_path"]))
+        self.logger = setup_logger("log-processor", str(PROJECT_ROOT / config["log_file_path"]))
         self.model = model
         self.config = config
         self.pbar = pbar

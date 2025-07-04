@@ -1,12 +1,6 @@
-import sys
-import os
-from .file_source import FileLogSource
-from .kafka_source import KafkaLogSource
-from .base import LogSource
-
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
+from scripts.log_sources.file_source import FileLogSource
+from scripts.log_sources.kafka_source import KafkaLogSource
+from scripts.log_sources.base import LogSource
 
 from scripts.paths import PROJECT_ROOT
 
