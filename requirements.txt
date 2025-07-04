@@ -9,3 +9,4 @@ matplotlib
 pandas
 streamlit
 mplcursors
+prometheus_client

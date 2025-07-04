@@ -8,13 +8,14 @@ from utils.paths import PROJECT_ROOT
 from utils.logger import setup_logger
 
 from monitoring.health_registry import registry as health_registry
+from monitoring.alerts import console_alert
+from monitoring.metrics_server import update_drift_score, increment_alerts, increment_centroid_updates
 
 class LogProcessor:
-    def __init__(self, model, config, pbar):
+    def __init__(self, model, config):
         self.logger = setup_logger("log-processor", str(PROJECT_ROOT / config["log_file_path"]))
         self.model = model
         self.config = config
-        self.pbar = pbar
         self.buffer = []
         self.timestamps = []  #Track timestamps for each embedding
         self.last_centroid = None
@@ -36,7 +37,6 @@ class LogProcessor:
         try:
             timestamp, message = parse_log_line(line)
             if not message:
-                self.pbar.update(1)
                 return
 
             embedding = self.model.encode(message)
@@ -60,14 +60,20 @@ class LogProcessor:
 
                 if self.last_centroid is not None:
                     drift = cosine_distance(self.last_centroid, current_centroid)
-                    alert = drift > self.config["drift_threshold"]
+                    alert = drift > self.config["drift_threshold"] 
+
+                    update_drift_score(drift)
 
                     if alert:
+                        increment_alerts()
+                        console_alert(f"Drift detected with score {drift:.4f}")
                         self.drift_streak += 1
                         if self.drift_streak >= self.drift_patience:
+                            increment_centroid_updates()
                             self.last_centroid = current_centroid
                             updated = True
                             self.drift_streak = 0
+                            console_alert(f"Drift patience exceeded. Updating centroid.")
                     else:
                         self.drift_streak = 0
                     self.logger.info(
@@ -86,10 +92,8 @@ class LogProcessor:
                 self.buffer = self.buffer[self.stride:]
                 self.timestamps = self.timestamps[self.stride:]
 
-            self.pbar.update(1)
             health_registry.update("log_processor", "healthy")
         
         except Exception as e:
             self.logger.error(f"Error processing line {self.line_counter}: {e}")
-            self.pbar.update(1)
             health_registry.update("log_processor", "unhealthy")

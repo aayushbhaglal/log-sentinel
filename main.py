@@ -10,6 +10,10 @@ from utils.logger import setup_logger
 from monitoring.health_registry import registry as health_registry
 from monitoring.health_registry import start_heartbeat 
 
+from monitoring.metrics_server import start_metrics_server
+
+start_metrics_server(8000)
+
 if __name__ == "__main__":
     config = get_config()
     logger = setup_logger("main", str(PROJECT_ROOT / config["log_file_path"]))
@@ -18,8 +22,7 @@ if __name__ == "__main__":
         logger.info("Initializing BERT model...")
         model = SentenceTransformer(config["bert_model"])
 
-        pbar = tqdm(desc="Processed log lines", unit="lines")
-        processor = LogProcessor(model, config, pbar)
+        processor = LogProcessor(model, config)
 
         logger.info("Starting log processing thread...")
         line_queue = Queue()
@@ -32,4 +35,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         logger.exception("Fatal error occurred in main execution")
-        health_registry.update("drift_monitor", "unhealthy")
+        health_registry.update("main", "unhealthy")
